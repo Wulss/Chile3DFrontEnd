@@ -12,8 +12,9 @@ import {
   Box,
 } from "@mui/material";
 import { css } from "@emotion/react";
-import AdminTabs from "../components/AdminTabs";
+import AdminTabs from "../components/Admin/AdminTabs";
 import { useNavigate } from "react-router-dom";
+import LogOutButton from "../components/Admin/LogOut";
 
 const useStyles = {
   root: css`
@@ -49,7 +50,10 @@ export default function AdminPage() {
             <Button  css={useStyles.logo} onClick={handleClick}>
               Chile3D
             </Button>
-          <div style={{ flexGrow: 1 }} />
+            <div style={{ flexGrow: 1 }} />
+            <div><LogOutButton /></div>
+          
+          
         </Toolbar>
       </AppBar>
       <AdminTabs />

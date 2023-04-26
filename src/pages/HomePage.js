@@ -121,7 +121,11 @@ export default function HomePage() {
   const navigate = useNavigate();
   const handleClick = () => {
     navigate("/search");
-    console.log("The button was clicked");
+    console.log("Navigate to search page");
+  };
+  const handleClick2 = () => {
+    navigate("/joinus");
+    console.log("Navigate to join us page");
   };
 
   return (
@@ -138,7 +142,7 @@ export default function HomePage() {
 
           <Button color="inherit">About Us</Button>
           <Button color="inherit">Contact</Button>
-          <Button color="inherit">Be Part</Button>
+          <Button color="inherit" onClick={handleClick2}>Be Part</Button>
         </Toolbar>
       </AppBar>
       
@@ -216,7 +220,7 @@ export default function HomePage() {
             <Typography variant="h4" align="center" css={useStyles.div3Text}>
               ¿Tienes datos altimétricos que quieres aportar?
             </Typography>
-            <Button variant="contained" css={useStyles.button2}>
+            <Button variant="contained" css={useStyles.button2} onClick={handleClick2}>
               Subir datos
             </Button>
           </Box>

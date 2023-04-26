@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Map from "ol/Map";
 import View from "ol/View";
 import TileLayer from "ol/layer/Tile";
+import { transform } from "ol/proj";
 import OSM from "ol/source/OSM";
 import Draw from "ol/interaction/Draw";
 import VectorSource from "ol/source/Vector";
@@ -13,13 +14,17 @@ import axios from "axios";
 
 import { fromLonLat } from "ol/proj";
 
-function SearchMap(/* { dibujoHabilitado } */ { clearGeometry, setClearGeometry, onDrawEnd }) {
+import { getFilesByPolygon } from "../../services/api";
+import { set } from "ol/transform";
+
+function SearchMap(
+  /* { dibujoHabilitado } */ { clearGeometry, setClearGeometry, onDrawEnd }
+) {
   const mapRef = useRef(null);
   //const [draw, setDraw] = useState(null);
   const [vSource, setVSource] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
   const [files, setFiles] = useState([]);
-
 
   useLayoutEffect(() => {
     const geometryStyle = [
@@ -56,8 +61,10 @@ function SearchMap(/* { dibujoHabilitado } */ { clearGeometry, setClearGeometry,
       wrapX: false,
     });
     setVSource(vectorSource);
-    const vectorLayer = new VectorLayer({ source: vectorSource, style: geometryStyle });
-    
+    const vectorLayer = new VectorLayer({
+      source: vectorSource,
+      style: geometryStyle,
+    });
 
     const map = new Map({
       target: mapRef.current,
@@ -65,7 +72,7 @@ function SearchMap(/* { dibujoHabilitado } */ { clearGeometry, setClearGeometry,
       controls: [],
       view: new View({
         center: fromLonLat([-70.65, -33.45]),
-        zoom: 9,
+        zoom: 1,
       }),
     });
 
@@ -75,31 +82,17 @@ function SearchMap(/* { dibujoHabilitado } */ { clearGeometry, setClearGeometry,
     });
     //setDraw(draw);
 
-    /* const fetchFiles = async (geojson) => {
-      const response = await axios.post(
-        "http://127.0.0.1:8000/geojson",
-        geojson
-      );
-      console.log(response.data["inside"]);
-      setFiles(response.data["inside"]);
-      //setFiles(response.data);
-    }; */
-
     map.addInteraction(draw);
-    draw.on("drawend", (e) => {
+    draw.on("drawend", async (e) => {
       console.log("drawend");
       const feature = e.feature;
       const geom = feature.getGeometry();
       const coords = geom.getCoordinates();
-      console.log(coords);
-      setCoordinates(e.feature.getGeometry().getCoordinates());
-      coords.map((coord) => {
-        console.log(coord);
-        onDrawEnd(coord);
-      });
-      //setFiles(["Archivo LAZ 1, Archivo LAZ 2"]);
+      for (let i = 0; i < coords[0].length; i++) {
+        coords[0][i] = transform(coords[0][i], "EPSG:3857", "EPSG:4326");
+      }
 
-      /* var geojson = {
+      var geojson = {
         type: "FeatureCollection",
         features: [
           {
@@ -112,21 +105,36 @@ function SearchMap(/* { dibujoHabilitado } */ { clearGeometry, setClearGeometry,
           },
         ],
       };
-      geojson = JSON.stringify(geojson);
 
-      fetchFiles(geojson);
- */
+      // Make a request to the API with the polygon coordinates
+      try {
+        var response = await getFilesByPolygon(JSON.stringify(geojson));
+        setFiles(response);
+        
+        console.log("trying to get files by polygon");
+      } catch (error) {
+        // Handle the error
+        console.log("Error getting files by polygon");
+        console.error(error);
+      }      
+
+      setCoordinates(e.feature.getGeometry().getCoordinates());
     });
   }, []);
 
+  useEffect(() => {
+    //console.log("files is " + files);
+    onDrawEnd(files);
+  }, [files]);
 
   useEffect(() => {
     console.log("useEffect3");
     console.log(clearGeometry);
-    if ((clearGeometry === true)) {
+    if (clearGeometry === true) {
       vSource.clear();
       setClearGeometry(false);
-    }},[clearGeometry, vSource]);
+    }
+  }, [clearGeometry, vSource]);
 
   return <div ref={mapRef} style={{ width: "100%", height: "93vh" }} />;
 }

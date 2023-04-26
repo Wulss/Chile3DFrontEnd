@@ -1,16 +1,12 @@
 import React from "react";
-import { useEffect, useRef, useState } from "react";
 import { Grid, Typography } from "@mui/material";
 import Button from "@mui/material/Button";
-import SearchMap from "./SearchMap/SearchMap";
-import DrawButton from "./SearchMap/DrawButton";
-import ClearButton from "./SearchMap/ClearButton";
 import SearchField from "./SearchField";
 import SearchDate from "./SearchDate";
 
 export default function SearchTab({ handleButtonClick }) {
   return (
-    <Grid container rowSpacing={3} >
+    <Grid container rowSpacing={3}>
       <Grid item xs={12}>
         <Grid container rowSpacing={2}>
           <Grid item xs={12}>
@@ -22,7 +18,7 @@ export default function SearchTab({ handleButtonClick }) {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h7" gutterBottom >
+            <Typography variant="h7" gutterBottom>
               Búsqueda por archivos
             </Typography>
 
@@ -30,7 +26,7 @@ export default function SearchTab({ handleButtonClick }) {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h7" gutterBottom >
+            <Typography variant="h7" gutterBottom>
               Búsqueda por fecha
             </Typography>
             <SearchDate />
@@ -38,12 +34,11 @@ export default function SearchTab({ handleButtonClick }) {
         </Grid>
       </Grid>
       <Grid item xs={12}>
-      <Button variant="contained" onClick={handleButtonClick}>
-              {" "}
-              Limpiar Geometría
-            </Button>
-        </Grid>
-      
+        <Button variant="contained" onClick={handleButtonClick}>
+          {" "}
+          Limpiar Geometría
+        </Button>
+      </Grid>
     </Grid>
   );
 }

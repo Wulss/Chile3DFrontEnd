@@ -8,9 +8,10 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import HomePage from './pages/HomePage';
 import SearchPage from "./pages/SearchPage";
-import LoginPage from "./pages/SignInPage";
-import SignInPage from "./pages/SignInPage";
+import LogInPage from "./pages/LogInPage";
 import AdminPage from "./pages/AdminPage";
+import JoinUsPage from "./pages/JoinUsPage";
+import ProtectedRoute from "./services/ProtectedRoute";
 
 
 const theme = createTheme({
@@ -43,8 +44,9 @@ export default function App() {
           <Route exact path="/" element={<HomePage/>} />
           <Route path="/home" element={<HomePage/>} />
           <Route path="/search" element={<SearchPage/>} />
-          <Route path="/signin" element={<SignInPage/>} />
-          <Route path="/admin" element={<AdminPage/>} />
+          <Route path="/login" element={<LogInPage/>} />
+          <Route path="/admin" element={<ProtectedRoute/>} />
+          <Route path="/joinus" element={<JoinUsPage/>} />
       </Routes>
       </BrowserRouter>
     </ThemeProvider>

@@ -32,7 +32,6 @@ const useStyles = {
     flex: 1;
     background: #f5f5f5;
     height: 25vh;
-    width: 75vw;
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
   `,
@@ -64,16 +63,16 @@ export default function FileUploader() {
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
-      <Grid item xs={12} css={useStyles.uploadContainer}>
+      <Grid item xs={12} >
       <Paper css={useStyles.paper}>
         <Typography variant="h6" sx={{ marginLeft: "20px" }}>
-          Upload Files
+          Agregar nuevos archivos
         </Typography>
         <Divider css={useStyles.divider} />
         <div css={useStyles.dropzoneContainer}>
           <div {...getRootProps()} css={useStyles.dropzone}>
             <input {...getInputProps()} />
-            <p>Drag and drop files here or click to select files</p>
+            <p>Arraste y suelte los archivos aquí o haga clic para seleccionar archivos</p>
           </div>
         </div>
       </Paper>
