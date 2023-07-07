@@ -2,29 +2,59 @@
 /** @jsxImportSource @emotion/react */
 import React from "react";
 import { AppBar, Toolbar, Typography, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { css } from "@emotion/react";
+import LogOutButton from "../components/Admin/LogOut";
 
 const useStyles = {
-    logo: css`
-      flex-grow: 1;
-      font-weight: bold;
-    `,
-    toolbar: css`
-      justify-content: flex-end;
-    `};
+  logo: css`
+    font-weight: bold;
+    font-size: 1.5rem;
+  `,
+  toolbar: css`
+    justify-content: flex-end;
+  `,
+};
 
-export default function Navbar(transparent) {
+export default function Navbar({ transparent, adminPanel }) {
+  const navigate = useNavigate();
+
+  // Maneja el evento de clic para redirigir a la página de inicio
+  const handleClick = () => {
+    navigate("/home");
+  };
+
+  // Maneja el evento de clic para redirigir a la página "joinus"
+  const handleClick2 = () => {
+    navigate("/joinus");
+    console.log("Navigate to join us page");
+  };
+
   return (
-      <AppBar css={css`
-      background-color: ${transparent ? "transparent" : "#151515"}`}>
-        <Toolbar css={useStyles.toolbar}>
-          <Typography variant="h5" css={useStyles.logo}>
-            Chile3D
-          </Typography>
-          <Button color="inherit">About Us</Button>
-          <Button color="inherit">Contact</Button>
-          <Button color="inherit">Be Part</Button>
-        </Toolbar>
-      </AppBar>
+    <AppBar
+      position="static"
+      style={{
+        background: transparent ? "transparent" : "#151515",
+        boxShadow: "none",
+      }}
+    >
+      <Toolbar css={useStyles.toolbar}>
+        <Button color="inherit" onClick={handleClick} css={useStyles.logo}>
+          Chile3D
+        </Button>
+        <div style={{ flexGrow: 1 }} />
+        {adminPanel ? (
+          <div>
+            <LogOutButton />
+          </div>
+        ) : (
+          <>
+            {/* <Button color="inherit">Sobre nosotros</Button>
+            <Button color="inherit">Contacto</Button> */}
+            <Button color="inherit" onClick={handleClick2}>Se parte</Button>
+          </>
+        )}
+      </Toolbar>
+    </AppBar>
   );
 }

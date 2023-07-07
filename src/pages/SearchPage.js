@@ -10,9 +10,10 @@ import Button from "@mui/material/Button";
 import { css } from "@emotion/react";
 import TwoTabs from "../components/TwoTabs";
 import { Grid } from "@mui/material";
-import { createContext, useContext, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SearchMap from "../components/SearchMap/SearchMap";
+import Navbar from "../components/Navbar";
 
 const useStyles = {
   root: css`
@@ -28,55 +29,54 @@ const useStyles = {
   `,
 };
 
-export const GeometryContext = createContext();
 
 export default function SearchPage() {
   const [clearGeometry, setClearGeometry] = useState(false);
   const [results, setResults] = useState(null);
+  const [activeTab, setActiveTab] = useState(0);
 
-  const navigate = useNavigate();
-  const handleClick = () => {
-    navigate("/home");
-  };
+  useEffect(() => {
+    console.log("Active Tab:", activeTab);
+  }, [activeTab]);
 
-  const handleButtonClick = () => {
+  // Esta función maneja la acción de limpiar la geometría en el mapa.
+  const handleClearGeometry = () => {
     setClearGeometry(true);
   };
-
+  
+  // Esta función maneja los resultados obtenidos de la búsqueda.
   const handleResults = (updatedResults) => {
     setResults(updatedResults);
   };
 
+  // Esta función maneja el evento de finalización del dibujo en el mapa para cambiar a la pestaña de resultados.
+  const handleFinishDrawing = () => {
+    console.log("finished drawing");
+    setActiveTab(1);
+    console.log("active tab:", activeTab );
+  };
+
+  
+
   return (
     <div css={useStyles.root}>
-      <AppBar
-        position="static"
-        style={{ background: "#151515", boxShadow: "none" }}
-      >
-        <Toolbar css={useStyles.toolbar}>
-          <Button color="inherit"  onClick={handleClick} css={useStyles.logo}>
-            Chile3D
-          </Button>
-          <div style={{ flexGrow: 1 }} />
-          <Button color="inherit">About Us</Button>
-          <Button color="inherit">Contact</Button>
-          <Button color="inherit">Be Part</Button>
-        </Toolbar>
-      </AppBar>
-      {/* <Button variant="contained" onClick={()=> console.log(results)}>
-        test
-      </Button> */}
 
+      {/* Componente Navbar */}
+      <Navbar />
       <Grid container>
+
+        {/* Componente que maneja las pestañas */}
         <Grid item xs={5}>
-          <TwoTabs handleButtonClick={handleButtonClick} results={results} />
+          <TwoTabs handleClearButton={handleClearGeometry} results={results} activeTab={activeTab} setActiveTab={setActiveTab} />
         </Grid>
 
+        {/* Componente de mapa de búsqueda */}
         <Grid item xs={7}>
           <SearchMap
             clearGeometry={clearGeometry}
             setClearGeometry={setClearGeometry}
             onDrawEnd={handleResults}
+            onFinishDrawing={handleFinishDrawing}
           />
         </Grid>
       </Grid>

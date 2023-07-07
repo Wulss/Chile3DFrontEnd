@@ -26,12 +26,8 @@ const theme = createTheme({
       main: '#fff',
       
     },
-    /* secondary: {
-      main: '#1776D1',
-      light: '#4dabf5',
-      dark: '#084c6f',
-      contrastText: '#fff',
-    }, */
+    typography: {
+      fontFamily: 'Roboto',}
   },
 });
 

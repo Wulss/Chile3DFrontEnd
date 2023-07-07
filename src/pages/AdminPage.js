@@ -2,19 +2,10 @@
 /** @jsxImportSource @emotion/react */
 
 import React from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Link,
-  Button,
-  Grid,
-  Box,
-} from "@mui/material";
 import { css } from "@emotion/react";
 import AdminTabs from "../components/Admin/AdminTabs";
-import { useNavigate } from "react-router-dom";
-import LogOutButton from "../components/Admin/LogOut";
+
+import Navbar from "../components/Navbar";
 
 const useStyles = {
   root: css`
@@ -36,38 +27,10 @@ const useStyles = {
 };
 
 export default function AdminPage() {
-  const navigate = useNavigate();
-  const handleClick = () => {
-    navigate("/home");
-  };
   return (
     <div css={useStyles.root}>
-      <AppBar
-        position="static"
-        style={{ background: "#151515", boxShadow: "none" }}
-      >
-        <Toolbar css={useStyles.toolbar}>
-            <Button  css={useStyles.logo} onClick={handleClick}>
-              Chile3D
-            </Button>
-            <div style={{ flexGrow: 1 }} />
-            <div><LogOutButton /></div>
-          
-          
-        </Toolbar>
-      </AppBar>
+      <Navbar transparent={false} adminPanel={true} />
       <AdminTabs />
-      {/* <Grid container >
-        <Grid item xs>
-            <Box sx={{ bgcolor: "#6E6E6E", color: 'primary.contrastText', height: '100vh' }}>
-                <Grid container >
-                    <AdminTabs/>
-
-                </Grid>
-            </Box>
-        </Grid>
-
-      </Grid> */}
     </div>
   );
 }

@@ -19,7 +19,7 @@ const useStyles = {
   root: css`
     flex-grow: 1;
     display: flex;
-    height: calc(100vh - 54px); /* 64-20: 44px is the height of the header */
+    height: calc(100vh - 64px); /* 64px is the height of the header */
   `,
   tabbar: css`
     border-right: 1px solid #ccc;
@@ -29,6 +29,7 @@ const useStyles = {
   `,
 };
 
+// Componente de panel de pestaña
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -45,17 +46,18 @@ TabPanel.propTypes = {
   value: PropTypes.number.isRequired,
 };
 
+// Componente principal que representa los tabs de administrador
 export default function AdminTabs({ handleButtonClick, results }) {
   const [value, setValue] = React.useState(0);
 
-  //13573610
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
 
   return (
     <Grid container css={useStyles.root}>
-      <Grid item xs={2.2}  css={useStyles.tabbar}>
+      <Grid item xs={2.2} css={useStyles.tabbar}>
+        {/* Componente de pestañas verticales */}
         <Tabs
           orientation="vertical"
           variant="scrollable"
@@ -67,25 +69,29 @@ export default function AdminTabs({ handleButtonClick, results }) {
           <Tab label="Instituciones" />
         </Tabs>
       </Grid>
-      <Grid item xs={9.8}  css={useStyles.tab}>
+      <Grid item xs={9.8} css={useStyles.tab}>
+        {/* Contenido de los paneles de pestañas */}
         <TabPanel value={value} index={0}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <Typography variant="h4" component="div" sx={{ flexGrow: 1 }} >
+              <Typography variant="h4" component="div" sx={{ flexGrow: 1 }}>
                 Archivos
               </Typography>
             </Grid>
             <Grid item xs={12}>
+              {/* Componente de carga de archivos */}
               <FileUploader />
             </Grid>
 
             <Grid item xs={12}>
+              {/* Componente de edición de archivos */}
               <EditFiles />
             </Grid>
           </Grid>
         </TabPanel>
         <TabPanel value={value} index={1}>
-          <InstitutionTab/>
+          {/* Componente de pestaña de instituciones */}
+          <InstitutionTab />
         </TabPanel>
       </Grid>
     </Grid>

@@ -1,8 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
 /** @jsxImportSource @emotion/react */
 
-import React, { useState } from "react";
-import { css } from "@emotion/react";
+import React, { useState, useContext } from "react";
 import {
   Table,
   TableBody,
@@ -11,8 +10,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Button,
-  Typography,
   Grid,
   IconButton,
   Menu,
@@ -22,13 +19,20 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  TextField,
+  Button,
 } from "@mui/material";
-
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { css } from "@emotion/react";
 import InstitutionEditorForm from "./InstitutionEditForm";
+import { deleteInstitution } from "../../../services/api";
+import { SnackbarContext } from "../../SnackbarProvider";
 
 const useStyles = {
+  tableContainer: css`
+    width: 100%;
+    margin-top: 16px;
+    max-height: 60vh;
+  `,
   table: css`
     width: 100%;
     border-collapse: collapse;
@@ -47,6 +51,7 @@ const useStyles = {
   `,
 };
 
+// Definición de las columnas de la tabla
 const columns = [
   { id: "nombre", label: "Nombre", minWidth: 170 },
   { id: "descripcion", label: "Descripción", minWidth: 100 },
@@ -59,104 +64,165 @@ const columns = [
   { id: "acciones", minWidth: 170 },
 ];
 
-export default function InstitutionsTable({ institutions }) {
+// Componente que muestra la tabla de instituciones
+export default function InstitutionsTable({
+  institutions,
+  onEditInstitution,
+  onDeleteInstitution,
+}) {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [open, setOpen] = useState(false);
+  const [selectedInstitution, setSelectedInstitution] = useState(null);
+  const [openDialogs, setOpenDialogs] = useState({});
+  const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
+  const [institutionToDelete, setInstitutionToDelete] = useState(null);
 
-  const handleClick = (event) => {
+  const { showSnackbar } = useContext(SnackbarContext);
+
+  const handleClickEdit = (event, institution) => {
+    setSelectedInstitution(institution);
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleCloseMenu = () => {
     setAnchorEl(null);
-    setOpen(false);
   };
 
-  const handleOpen = () => {
-    console.log("open");
-    setOpen(true);
+  // Manejador de evento para editar una institución
+  const handleEditInstitution = (editedInstitution) => {
+    console.log("editedInstitution", editedInstitution);
+    onEditInstitution(editedInstitution);
+    setSelectedInstitution(null);
+    handleCloseDialog(editedInstitution.id);
   };
 
-  const handleCloseDialog = () => {
-    setOpen(false);
+  // Manejador de evento para eliminar una institución
+  const handleDeleteInstitution = (institutionId) => {
+    setInstitutionToDelete(institutionId);
+    setConfirmDeleteDialogOpen(true);
+  };
+
+  // Manejador de evento para confirmar la eliminación de una institución
+  const handleConfirmDelete = () => {
+    deleteInstitution(institutionToDelete);
+    onDeleteInstitution(institutionToDelete);
+    showSnackbar("Institución eliminada correctamente", "success");
+    setConfirmDeleteDialogOpen(false);
+  };
+
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteDialogOpen(false);
+  };
+
+  const handleOpenDialog = (institutionId) => {
+    setOpenDialogs((prevState) => ({
+      ...prevState,
+      [institutionId]: true,
+    }));
+  };
+
+  const handleCloseDialog = (institutionId) => {
+    setOpenDialogs((prevState) => ({
+      ...prevState,
+      [institutionId]: false,
+    }));
   };
 
   return (
-    <Grid container sx={{ overflowX: "auto", maxWidth: "80vw" }}>
+    <Grid container sx={{ overflowX: "auto", maxWidth: "80vw"}}>
       <Grid item xs={12}>
-        <Table aria-label="sticky table">
-          <TableHead>
-            <TableRow>
-              {columns.map((column) => (
-                <TableCell
-                  css={useStyles.headerCell}
-                  key={column.id}
-                  align={column.align}
-                >
-                  {column.label}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {institutions.map((row) => (
-              <React.Fragment key={row.id}>
-                <TableRow key={row.id}>
+        <TableContainer component={Paper} css={useStyles.tableContainer}>
+          <Table aria-label="sticky table">
+            <TableHead>
+              <TableRow>
+                {columns.map((column) => (
+                  <TableCell
+                    css={useStyles.headerCell}
+                    key={column.id}
+                    align={column.align}
+                  >
+                    {column.label}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {/* Filas de datos */}
+              {institutions.map((institution) => (
+                <TableRow key={institution.id}>
+                  {/* Celdas de datos */}
                   {columns.map((column) => (
                     <TableCell key={column.id} css={useStyles.cell}>
-                      {row[column.id]}
+                      {institution[column.id]}
                     </TableCell>
                   ))}
+                  {/* Celda de acciones */}
                   <TableCell>
-                    <IconButton onClick={handleClick}>
+                    <IconButton
+                      onClick={(event) => handleClickEdit(event, institution)}
+                    >
                       <MoreVertIcon />
                     </IconButton>
+                    {/* Menú de opciones de edición */}
                     <Menu
                       id="simple-menu"
                       anchorEl={anchorEl}
                       keepMounted
                       open={Boolean(anchorEl)}
-                      onClose={handleClose}
+                      onClose={handleCloseMenu}
                     >
-                      <MenuItem onClick={handleOpen}>Edit</MenuItem>
-                      <MenuItem onClick={handleClose}>Delete</MenuItem>
+                      {/* Opción de edición */}
+                      <MenuItem
+                        onClick={() => {
+                          handleOpenDialog(institution.id);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Editar
+                      </MenuItem>
+                      {/* Opción de eliminación */}
+                      <MenuItem
+                        onClick={() => {
+                          handleDeleteInstitution(institution.id);
+                          handleCloseDialog(institution.id);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Eliminar
+                      </MenuItem>
                     </Menu>
+                    {/* Formulario de edición de institución */}
+                    <InstitutionEditorForm
+                      institution={selectedInstitution}
+                      onSave={handleEditInstitution}
+                      open={openDialogs[institution.id] || false}
+                      onClose={() => handleCloseDialog(institution.id)}
+                    />
                   </TableCell>
                 </TableRow>
-                <Dialog
-                  key={`dialog-${row.id}`}
-                  open={open}
-                  onClose={handleClose}
-                  aria-labelledby="form-dialog-title"
-                >
-                  <DialogTitle id="form-dialog-title">
-                    Editar institución
-                  </DialogTitle>
-                  <DialogContent>
-                    <DialogContentText>
-                      Para editar este institución, por favor ingrese la información
-                      que desee cambiar.
-                    </DialogContentText>
-                    <InstitutionEditorForm institution={row} />
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleClose}
-                      color="primary"
-                      variant="contained"
-                    >
-                      Guardar
-                    </Button>
-                  </DialogActions>
-                </Dialog>
-              </React.Fragment>
-            ))}
-          </TableBody>
-        </Table>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Grid>
+
+      {/* Diálogo de confirmación de eliminación */}
+      <Dialog open={confirmDeleteDialogOpen} onClose={handleCancelDelete}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro que quieres eliminar esta institución?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 }

@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
 /** @jsxImportSource @emotion/react */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Grid,
   Typography,
@@ -14,7 +14,8 @@ import {
   DialogContentText,
 } from "@mui/material";
 import { css } from "@emotion/react";
-import { editInstitution } from "../../../services/api";
+import { createInstitution } from "../../services/api";
+import { SnackbarContext } from "../SnackbarProvider";
 
 const useStyles = {
   formContainer: css`
@@ -37,16 +38,8 @@ const useStyles = {
   `,
 };
 
-export default function InstitutionEditorForm({
-  institution,
-  onSave,
-  onClose,
-  open,
-}) {
-
-  // Definición de los campos del formulario
+export default function NewInstitutionForm({ onClose, open, setInstitutions }) {
   const [formData, setFormData] = useState({
-    id: "",
     nombre: "",
     descripcion: "",
     sitio_web: "",
@@ -57,23 +50,8 @@ export default function InstitutionEditorForm({
     tipo_institucion: "",
   });
 
-  useEffect(() => {
-    if (institution) {
-      setFormData({
-        id: institution.id,
-        nombre: institution.nombre,
-        descripcion: institution.descripcion,
-        sitio_web: institution.sitio_web,
-        email: institution.email,
-        telefono: institution.telefono,
-        direccion: institution.direccion,
-        area_trabajo: institution.area_trabajo,
-        tipo_institucion: institution.tipo_institucion,
-      });
-    }
-  }, [institution]);
+  const { showSnackbar } = useContext(SnackbarContext);
 
-  // Manejador de cambio de entrada en los campos del formulario
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevState) => ({
@@ -82,63 +60,50 @@ export default function InstitutionEditorForm({
     }));
   };
 
-  // Manejador de guardado de los cambios realizados en la institución
-  const handleSave = () => {
-    editInstitution(institution.id, formData);
-    onSave(formData);
-    onClose();
-  };
-
-  // Manejador de cierre del diálogo de edición de institución
-  const handleClose = () => {
-    // Comprobar si hay cambios sin guardar antes de cerrar
-    if (hasUnsavedChanges()) {
-      const confirmDiscardChanges = window.confirm(
-        "Hay cambios sin guardar. ¿Estás seguro de que deseas cerrar sin guardar?"
-      );
-      if (!confirmDiscardChanges) {
-        return;
-      }
-    }
-
-    // Restablecer el formulario con los valores originales de la institución
+  const resetForm = () => {
     setFormData({
-      nombre: institution.nombre,
-      descripcion: institution.descripcion,
-      sitio_web: institution.sitio_web,
-      email: institution.email,
-      telefono: institution.telefono,
-      direccion: institution.direccion,
-      area_trabajo: institution.area_trabajo,
-      tipo_institucion: institution.tipo_institucion,
+      nombre: "",
+      descripcion: "",
+      sitio_web: "",
+      email: "",
+      telefono: "",
+      direccion: "",
+      area_trabajo: "",
+      tipo_institucion: "",
     });
-    onClose();
   };
 
-  const hasUnsavedChanges = () => {
-    return (
-      formData.nombre !== institution.nombre ||
-      formData.descripcion !== institution.descripcion ||
-      formData.sitio_web !== institution.sitio_web ||
-      formData.email !== institution.email ||
-      formData.telefono !== institution.telefono ||
-      formData.direccion !== institution.direccion ||
-      formData.area_trabajo !== institution.area_trabajo ||
-      formData.tipo_institucion !== institution.tipo_institucion
-    );
+  const handleSave = async () => {
+    try {
+      const response = await createInstitution(formData);
+      const newInstitution = response.data;
+
+      setInstitutions(formData);
+
+      resetForm();
+      onClose();
+      showSnackbar("Institución creada exitosamente", "success");
+    } catch (error) {
+      showSnackbar("Error al crear la institución", "error");
+    }
+  };
+
+  const handleClose = () => {
+    onClose();
   };
 
   return (
     <Dialog open={open} onClose={handleClose} fullWidth>
-      <DialogTitle>Editar Institución</DialogTitle>
+      <DialogTitle>Crear Institución</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          Edite los campos que desea cambiar
+          Ingrese los siguientes campos para crear una institución
         </DialogContentText>
+
+        {/* Formulario de creación de institución */}
         <form css={useStyles.formContainer}>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              {/* Campos de texto para la edición de los datos de la institución */}
               <TextField
                 css={useStyles.textfield}
                 label="Nombre"
@@ -226,7 +191,7 @@ export default function InstitutionEditorForm({
       <DialogActions>
         <Button onClick={handleClose}>Cancelar</Button>
         <Button onClick={handleSave} color="primary" variant="contained">
-          Guardar
+          Crear
         </Button>
       </DialogActions>
     </Dialog>

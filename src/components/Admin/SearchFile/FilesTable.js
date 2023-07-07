@@ -1,7 +1,7 @@
 /* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
 /** @jsxImportSource @emotion/react */
 
-import React, { useState } from "react";
+import React, { useState, useContext} from "react";
 import {
   Table,
   TableBody,
@@ -26,8 +26,15 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { css } from "@emotion/react";
 import FileEditorForm from "./FileEditorForm";
+import { deleteFile } from "../../../services/api";
+import { SnackbarContext } from "../../SnackbarProvider";
 
 const useStyles = {
+  tableContainer: css`
+    width: 100%;
+    margin-top: 16px;
+    max-height: 330px;
+  `,
   table: css`
     width: 100%;
     border-collapse: collapse;
@@ -37,7 +44,7 @@ const useStyles = {
     text-align: left;
     padding: 16px;
     border-bottom: 1px solid rgba(224, 224, 224, 1);
-    max-width: 100px;
+    max-width: 10px;
   `,
   cell: css`
     text-align: left;
@@ -46,54 +53,78 @@ const useStyles = {
   `,
 };
 
+// Definición de las columnas de la tabla
 const columns = [
-  { id: "nombre", label: "Nombre", minWidth: 170 },
-  { id: "descripcion", label: "Descripción", minWidth: 100 },
-  { id: "topic_category", label: "Topic Category", minWidth: 170 },
-  { id: "institucion", label: "Institución", minWidth: 170 },
-  { id: "acciones", minWidth: 170 },
+  { id: "nombre", label: "Nombre"},
+  { id: "descripcion", label: "Descripción" },
+  { id: "keyword", label: "Keyword" },
+  { id: "topic_category", label: "Topic Category" },
+  { id: "institucion", label: "Institución" },
+  { id: "acciones" },
 ];
 
-export default function FilesTable({ files }) {
+// Componente que muestra la tabla de archivos
+export default function FilesTable({ files, onEditFile, onDeleteFile }) {
   const [anchorEl, setAnchorEl] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [tableFiles, setTableFiles] = useState(files); // [files, setFiles]
+  const [openDialogs, setOpenDialogs] = useState({});
   const [selectedFile, setSelectedFile] = useState(null);
+  const [confirmDeleteDialogOpen, setConfirmDeleteDialogOpen] = useState(false);
+  const [fileToDelete, setFileToDelete] = useState(null);
 
+  const { showSnackbar } = useContext(SnackbarContext);
 
-  
-  const handleClick = (event, file) => {
-    setAnchorEl(event.currentTarget);
+  const handleClickEdit = (event, file) => {
     setSelectedFile(file);
-  };
-  
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-  
-  const handleClose = () => {
-    setAnchorEl(null);
-    setOpen(false);
+    setAnchorEl(event.currentTarget);
   };
 
-  const handleFileUpdate = (file) => {
-    const updatedFiles = files.map((f) => {
-      if (f.id === file.id) {
-        return file;
-      }
-      return f;
-    });
-    setTableFiles(updatedFiles);
-    setSelectedFile( null);
-    handleClose();
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
   };
-  
+
+  // Manejador de eventos para editar un archivo
+  const handleEditFile = (editedFile) => {
+    onEditFile(editedFile);
+    setSelectedFile(null);
+    handleCloseDialog(editedFile.id);
+  };
+
+  // Manejador de eventos para eliminar un archivo
+  const handleDeleteFile = (fileId) => {
+    setFileToDelete(fileId);
+    setConfirmDeleteDialogOpen(true);
+  };
+
+  // Manejador de eventos para confirmar la eliminación de un archivo
+  const handleConfirmDelete = () => {
+    deleteFile(fileToDelete);
+    onDeleteFile(fileToDelete);
+    showSnackbar("Archivo eliminado correctamente", "success");
+    setConfirmDeleteDialogOpen(false);
+  };
+
+  const handleCancelDelete = () => {
+    setConfirmDeleteDialogOpen(false);
+  };
+
+  const handleOpenDialog = (fileId) => {
+    setOpenDialogs((prevState) => ({
+      ...prevState,
+      [fileId]: true,
+    }));
+  };
+
+  const handleCloseDialog = (fileId) => {
+    setOpenDialogs((prevState) => ({
+      ...prevState,
+      [fileId]: false,
+    }));
+  };
+
   return (
-    <Grid
-      container
-      sx={{overflow: 'auto'}}
-    >
+    <Grid container >
       <Grid item xs={12}>
+        <TableContainer component={Paper} css={useStyles.tableContainer}>
         <Table css={useStyles.table} aria-label="simple table">
           <TableHead>
             <TableRow>
@@ -109,62 +140,79 @@ export default function FilesTable({ files }) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {files.map((row) => (
-              <React.Fragment key={row.id}>
-                <TableRow key={row.id}>
+            {/* Filas de la tabla */}
+            {files.map((file) => (
+              <React.Fragment key={file.id}>
+                <TableRow key={file.id}>
+                  {/* Celdas de cada fila */}
                   {columns.map((column) => (
                     <TableCell key={column.id} css={useStyles.cell}>
-                      {row[column.id]}
+                      {file[column.id]}
                     </TableCell>
                   ))}
+                  {/* Celda de acciones */}
                   <TableCell>
-                    <IconButton onClick={(event) => handleClick(event, row)}>
+                    <IconButton
+                      onClick={(event) => handleClickEdit(event, file)}
+                    >
                       <MoreVertIcon />
                     </IconButton>
+                    {/* Menú desplegable de acciones */}
                     <Menu
                       id="simple-menu"
                       anchorEl={anchorEl}
                       keepMounted
                       open={Boolean(anchorEl)}
-                      onClose={handleClose}
+                      onClose={handleCloseMenu}
                     >
-                      <MenuItem onClick={handleClickOpen}>Edit</MenuItem>
-                      <MenuItem onClick={handleClose}>Delete</MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          handleOpenDialog(file.id);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Editar
+                      </MenuItem>
+                      <MenuItem
+                        onClick={() => {
+                          handleDeleteFile(file.id);
+                          handleCloseDialog(file.id);
+                          handleCloseMenu();
+                        }}
+                      >
+                        Eliminar
+                      </MenuItem>
                     </Menu>
+                    <FileEditorForm
+                      file={selectedFile}
+                      onSave={handleEditFile}
+                      open={openDialogs[file.id] || false}
+                      onClose={() => handleCloseDialog(file.id)}
+                    />
                   </TableCell>
                 </TableRow>
-                <Dialog
-                  open={open}
-                  onClose={handleClose}
-                  aria-labelledby="form-dialog-title"
-                >
-                  <DialogTitle id="form-dialog-title">
-                    Editar archivo
-                  </DialogTitle>
-                  <DialogContent>
-                    <DialogContentText>
-                      Para editar este archivo, por favor ingrese la información
-                      que desee cambiar.
-                    </DialogContentText>
-                    <FileEditorForm file={selectedFile} />
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={handleClose} color="primary">
-                      Cancelar
-                    </Button>
-                    <Button
-                      onClick={handleClose}
-                      color="primary"
-                      variant="contained"
-                    >
-                      Guardar
-                    </Button>
-                  </DialogActions>
-                </Dialog>
               </React.Fragment>
             ))}
           </TableBody>
         </Table>
+      </TableContainer>
+      {/* Diálogo de confirmación de eliminación */}
+      <Dialog open={confirmDeleteDialogOpen} onClose={handleCancelDelete}>
+          <DialogTitle>Confirmar eliminación</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              ¿Estás seguro de que quieres eliminar este archivo?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelDelete} color="primary">
+              Cancelar
+            </Button>
+            <Button onClick={handleConfirmDelete} color="primary" autoFocus>
+              Eliminar
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Grid>
     </Grid>
   );

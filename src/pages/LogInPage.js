@@ -13,51 +13,18 @@ import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { handleLogin } from "../services/api";
 
 export default function LogInPage() {
-  const history = useNavigate();
+  const navigate = useNavigate();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
-  const [error, setError] = React.useState(null);
 
-  const handleLogin = async () => {
-    console.log("handleLogin");
-    try {
-      const config = {
-        headers: { 'Content-Type' : 'application/x-www-form-urlencoded; charset=UTF-8;application/json' }};
-
-      const response = await axios.post(
-        "http://127.0.0.1:8000/token",
-        {
-          username: email,
-          password: password,
-        },
-        config
-      );
-
-      localStorage.setItem("token", response.data.access_token);
-      history("/admin");
-    }
-    catch (error) {
-      setError(error);
-    }
-  };
-
-  
-
-  /* const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
-  };
- */
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
+      
+      {/* Contenedor principal */}
       <Box
         sx={{
           display: "flex",
@@ -67,10 +34,16 @@ export default function LogInPage() {
           justifyContent: "center",
         }}
       >
+        
+        {/* Título */}
         <Typography component="h1" variant="h5">
           Iniciar sesión en Chile3D
         </Typography>
-        <Box  sx={{ mt: 1 }}>
+        
+        {/* Formulario */}
+        <Box sx={{ mt: 1 }}>
+          
+          {/* Campo de texto: Email */}
           <TextField
             margin="normal"
             required
@@ -84,6 +57,8 @@ export default function LogInPage() {
               setEmail(e.target.value);
             }}
           />
+          
+          {/* Campo de texto: Contraseña */}
           <TextField
             margin="normal"
             required
@@ -97,19 +72,28 @@ export default function LogInPage() {
               setPassword(e.target.value);
             }}
           />
+          
+          {/* Checkbox: Recordarme */}
           <FormControlLabel
             control={<Checkbox value="remember" color="primary" />}
             label="Recordarme"
           />
+          
+          {/* Botón Iniciar sesión */}
           <Button
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            onClick={handleLogin}
+            onClick={() => {
+              handleLogin(email, password, navigate);
+              console.log("Login button clicked");
+            }}
           >
             Iniciar sesión
           </Button>
+          
+          {/* Enlaces adicionales */}
           <Grid container>
             <Grid item xs>
               <Link href="#" variant="body2">
@@ -118,7 +102,7 @@ export default function LogInPage() {
             </Grid>
             <Grid item>
               <Link href="#" variant="body2">
-                {"¿No tienes una cuenta? \n Contáctanos"}
+                ¿No tienes una cuenta? Contáctanos
               </Link>
             </Grid>
           </Grid>

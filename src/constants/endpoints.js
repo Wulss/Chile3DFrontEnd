@@ -1,3 +1,8 @@
 export const ENDPOINTS = {
-    BASE_URL: 'http://127.0.0.1:8000',
-    BUSQUEDA_POLIGONO: '/archivos/buscar/poligono'}
+    BASE_URL: 'http://181.163.51.44:8000',
+    TOKEN: '/token',
+    FILES: '/files',
+    INSTITUTIONS: '/institutions',
+    POLYGON: '/polygon',
+    DOWNLOAD: '/download',
+}

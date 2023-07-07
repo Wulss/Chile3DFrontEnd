@@ -1,0 +1,73 @@
+ <Grid container spacing={4}>
+              {/* Sección 1: Desastres Naturales */}
+              <Grid item xs={12} sm={6} md={5} css={useStyles.imageColumn}>
+                <Box display="flex" justifyContent="center">
+                  <img
+                    src={natural_disaster}
+                    alt="image2"
+                    style={{ maxHeight: "390px", maxWidth: "100%" }}
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={5} css={useStyles.textColumn}>
+                <Typography variant="h4">
+                  Desastres Naturales: Comprende y Mitiga los Riesgos
+                </Typography>
+                <Typography variant="body3" sx={{ fontSize: "1.4rem" }}>
+                  La información geoespacial precisa es esencial para comprender
+                  y mitigar los riesgos asociados a desastres naturales. Con
+                  Chile3D, puedes acceder a datos detallados sobre terrenos,
+                  pendientes y cuencas hidrográficas, lo que te permite evaluar
+                  áreas propensas a inundaciones, deslizamientos de tierra u
+                  otros eventos peligrosos.
+                </Typography>
+              </Grid>
+
+              {/* Sección 2: Planificación Urbana */}
+              <Grid item xs={12} sm={5} css={useStyles.textColumn}>
+                <Typography variant="h4">
+                  Planificación Urbana: Diseña Ciudades Sostenibles
+                </Typography>
+                <Typography variant="body1" sx={{ fontSize: "1.3rem" }}>
+                  La planificación urbana eficiente requiere información precisa
+                  sobre el terreno y la topografía. Con Chile3D, puedes explorar
+                  y analizar datos geoespaciales detallados para evaluar áreas
+                  adecuadas para el desarrollo urbano, identificar riesgos
+                  ambientales y optimizar el diseño de infraestructuras.
+                </Typography>
+              </Grid>
+              <Grid item xs={12} sm={5} css={useStyles.imageColumn}>
+                <Box display="flex" justifyContent="center">
+                  <img
+                    src={planificacion_urbana}
+                    alt="image2"
+                    style={{ maxHeight: "390px", maxWidth: "100%" }}
+                  />
+                </Box>
+              </Grid>
+
+              {/* Sección 3: Recursos Naturales */}
+              <Grid item xs={12} sm={5} css={useStyles.imageColumn}>
+                <Box display="flex" justifyContent="center">
+                  <img
+                    src={recurso_natural}
+                    alt="image2"
+                    style={{ maxHeight: "390px", maxWidth: "100%" }}
+                  />
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={5} css={useStyles.textColumn}>
+                <Typography variant="h4">
+                  Recursos Naturales: Gestión Inteligente y Sostenible
+                </Typography>
+                <Typography variant="body1" sx={{ fontSize: "1.3rem" }}>
+                  Los recursos naturales son vitales para el desarrollo
+                  económico y la preservación del medio ambiente. Con Chile3D,
+                  puedes acceder a datos geoespaciales detallados sobre la
+                  topografía y la vegetación, lo que te permite identificar
+                  áreas de alto valor ecológico, evaluar el impacto de
+                  actividades humanas y planificar la gestión sostenible de los
+                  recursos naturales.
+                </Typography>
+              </Grid>
+            </Grid>

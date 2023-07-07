@@ -1,3 +1,6 @@
+/* eslint-disable react/react-in-jsx-scope -- Unaware of jsxImportSource */
+/** @jsxImportSource @emotion/react */
+
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Map from "ol/Map";
 import View from "ol/View";
@@ -9,23 +12,38 @@ import VectorSource from "ol/source/Vector";
 import VectorLayer from "ol/layer/Vector";
 import { Style, Stroke, Fill, Circle as CircleStyle } from "ol/style";
 import { MultiPoint } from "ol/geom";
-import { Button } from "@mui/material";
-import axios from "axios";
-
-import { fromLonLat } from "ol/proj";
-
 import { getFilesByPolygon } from "../../services/api";
-import { set } from "ol/transform";
+import TextField from "@mui/material/TextField";
 
-function SearchMap(
-  /* { dibujoHabilitado } */ { clearGeometry, setClearGeometry, onDrawEnd }
-) {
+const SearchMap = ({
+  clearGeometry,
+  setClearGeometry,
+  onDrawEnd,
+  onFinishDrawing,
+}) => {
   const mapRef = useRef(null);
-  //const [draw, setDraw] = useState(null);
   const [vSource, setVSource] = useState(null);
   const [coordinates, setCoordinates] = useState(null);
   const [files, setFiles] = useState([]);
+  const [mouseCoordinates, setMouseCoordinates] = useState(null);
 
+  // Formatea las coordenadas para mostrarlas en el TextField
+  const formatCoordinates = (coordinates) => {
+    if (coordinates && coordinates.length === 2) {
+      const lonLat = transform(coordinates, "EPSG:3857", "EPSG:4326");
+      const lon = lonLat[0].toFixed(6);
+      const lat = lonLat[1].toFixed(6);
+      return `${lat}, ${lon}`;
+    }
+    return "";
+  };
+
+  // Maneja el cambio de pestaña al finalizar el dibujo
+  const handleTabChanging = () => {
+    onFinishDrawing();
+  };
+
+  // Configuración inicial del mapa y la interacción de dibujo
   useLayoutEffect(() => {
     const geometryStyle = [
       new Style({
@@ -54,13 +72,17 @@ function SearchMap(
         },
       }),
     ];
+
     const basemap = new TileLayer({
       source: new OSM(),
     });
+
     const vectorSource = new VectorSource({
       wrapX: false,
     });
+
     setVSource(vectorSource);
+
     const vectorLayer = new VectorLayer({
       source: vectorSource,
       style: geometryStyle,
@@ -71,8 +93,8 @@ function SearchMap(
       layers: [basemap, vectorLayer],
       controls: [],
       view: new View({
-        center: fromLonLat([-70.65, -33.45]),
-        zoom: 1,
+        center: transform([-70.6506, -33.4372], "EPSG:4326", "EPSG:3857"),
+        zoom: 6,
       }),
     });
 
@@ -80,11 +102,18 @@ function SearchMap(
       source: vectorSource,
       type: "Polygon",
     });
-    //setDraw(draw);
+
+    // Maneja el evento de mover el puntero del mouse y muestra las coordenadas correspondientes
+    map.on("pointermove", (e) => {
+      const [x, y] = map.getEventPixel(e.originalEvent);
+      const coordinates = map.getCoordinateFromPixel([x, y]);
+      setMouseCoordinates(coordinates);
+    });
 
     map.addInteraction(draw);
+
+    // Maneja el evento de finalizar el dibujo del polígono
     draw.on("drawend", async (e) => {
-      console.log("drawend");
       const feature = e.feature;
       const geom = feature.getGeometry();
       const coords = geom.getCoordinates();
@@ -92,7 +121,7 @@ function SearchMap(
         coords[0][i] = transform(coords[0][i], "EPSG:3857", "EPSG:4326");
       }
 
-      var geojson = {
+      const geojson = {
         type: "FeatureCollection",
         features: [
           {
@@ -106,37 +135,47 @@ function SearchMap(
         ],
       };
 
-      // Make a request to the API with the polygon coordinates
+      // Obtiene los archivos que intersectan con el polígono dibujado
       try {
-        var response = await getFilesByPolygon(JSON.stringify(geojson));
+        const response = await getFilesByPolygon(JSON.stringify(geojson));
         setFiles(response);
-        
-        console.log("trying to get files by polygon");
+        handleTabChanging();
       } catch (error) {
-        // Handle the error
         console.log("Error getting files by polygon");
         console.error(error);
-      }      
+      }
 
       setCoordinates(e.feature.getGeometry().getCoordinates());
     });
   }, []);
 
   useEffect(() => {
-    //console.log("files is " + files);
     onDrawEnd(files);
-  }, [files]);
+  }, [files, onDrawEnd]);
 
   useEffect(() => {
-    console.log("useEffect3");
-    console.log(clearGeometry);
     if (clearGeometry === true) {
       vSource.clear();
       setClearGeometry(false);
     }
-  }, [clearGeometry, vSource]);
+  }, [clearGeometry, setClearGeometry, vSource]);
 
-  return <div ref={mapRef} style={{ width: "100%", height: "93vh" }} />;
-}
+  return (
+    <div style={{ position: "relative", width: "100%", height: "93vh" }}>
+      <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
+      <div style={{ position: "absolute", bottom: 10, right: 10}}>
+        <TextField
+          label="Coordenadas"
+          value={mouseCoordinates ? formatCoordinates(mouseCoordinates) : ""}
+          variant="outlined"
+          sx={{ backgroundColor: "white", width: "18vw", maxWidth: "200px"}}
+          InputProps={{
+            readOnly: true,
+          }}
+        />
+      </div>
+    </div>
+  );
+};
 
 export default SearchMap;
