@@ -266,8 +266,7 @@ export const handleLogin = async (email, password, navigate) => {
       },
       config
     );
-    console.log("handleLogin response is ");
-    console.log(response.data.access_token);
+
     localStorage.setItem("token", response.data.access_token);
     navigate("/admin");
   } catch (error) {
