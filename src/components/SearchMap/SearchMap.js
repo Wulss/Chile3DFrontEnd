@@ -38,11 +38,6 @@ const SearchMap = ({
     return "";
   };
 
-  // Maneja el cambio de pestaña al finalizar el dibujo
-  const handleTabChanging = () => {
-    onFinishDrawing();
-  };
-
   // Configuración inicial del mapa y la interacción de dibujo
   useLayoutEffect(() => {
     const geometryStyle = [
@@ -93,7 +88,8 @@ const SearchMap = ({
       layers: [basemap, vectorLayer],
       controls: [],
       view: new View({
-        center: transform([-70.6506, -33.4372], "EPSG:4326", "EPSG:3857"),
+        //center: transform([-70.6506, -33.4372], "EPSG:4326", "EPSG:3857"), // Santiago
+        center: transform([-3.7025600, 40.4165000], "EPSG:4326", "EPSG:3857"), // Madrid
         zoom: 6,
       }),
     });
@@ -111,6 +107,11 @@ const SearchMap = ({
     });
 
     map.addInteraction(draw);
+
+    // Maneja el cambio de pestaña al finalizar el dibujo
+    const handleTabChanging = () => {
+      onFinishDrawing();
+    };
 
     // Maneja el evento de finalizar el dibujo del polígono
     draw.on("drawend", async (e) => {
@@ -139,7 +140,7 @@ const SearchMap = ({
       try {
         const response = await getFilesByPolygon(JSON.stringify(geojson));
         setFiles(response);
-        handleTabChanging();
+        onFinishDrawing();
       } catch (error) {
         console.log("Error getting files by polygon");
         console.error(error);
@@ -163,12 +164,12 @@ const SearchMap = ({
   return (
     <div style={{ position: "relative", width: "100%", height: "93vh" }}>
       <div ref={mapRef} style={{ width: "100%", height: "100%" }} />
-      <div style={{ position: "absolute", bottom: 10, right: 10}}>
+      <div style={{ position: "absolute", bottom: 10, right: 10 }}>
         <TextField
           label="Coordenadas"
           value={mouseCoordinates ? formatCoordinates(mouseCoordinates) : ""}
           variant="outlined"
-          sx={{ backgroundColor: "white", width: "18vw", maxWidth: "200px"}}
+          sx={{ backgroundColor: "white", width: "18vw", maxWidth: "200px" }}
           InputProps={{
             readOnly: true,
           }}

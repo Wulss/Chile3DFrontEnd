@@ -29,7 +29,6 @@ const useStyles = {
   `,
 };
 
-
 export default function SearchPage() {
   const [clearGeometry, setClearGeometry] = useState(false);
   const [results, setResults] = useState(null);
@@ -43,31 +42,33 @@ export default function SearchPage() {
   const handleClearGeometry = () => {
     setClearGeometry(true);
   };
-  
+
   // Esta función maneja los resultados obtenidos de la búsqueda.
   const handleResults = (updatedResults) => {
     setResults(updatedResults);
   };
 
   // Esta función maneja el evento de finalización del dibujo en el mapa para cambiar a la pestaña de resultados.
-  const handleFinishDrawing = () => {
+  const handleFinishDrawing = (event, newValue) => {
     console.log("finished drawing");
-    setActiveTab(1);
-    console.log("active tab:", activeTab );
+    setActiveTab((prevTab) => prevTab === 0 ? 1 : prevTab);
+    console.log("active tab:", activeTab);
   };
-
-  
 
   return (
     <div css={useStyles.root}>
-
       {/* Componente Navbar */}
       <Navbar />
       <Grid container>
-
         {/* Componente que maneja las pestañas */}
         <Grid item xs={5}>
-          <TwoTabs handleClearButton={handleClearGeometry} results={results} activeTab={activeTab} setActiveTab={setActiveTab} />
+          <TwoTabs
+            handleClearButton={handleClearGeometry}
+            results={results}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onFinishDrawing={handleFinishDrawing}
+          />
         </Grid>
 
         {/* Componente de mapa de búsqueda */}

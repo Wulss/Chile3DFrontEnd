@@ -41,14 +41,14 @@ export default function TwoTabs({
   // Maneja el cambio de pestaña
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    setActiveTab(newValue);
   };
 
-    // Actualiza los resultados de búsqueda
+  // Actualiza los resultados de búsqueda
   const handleSearchResults = (updatedResults) => {
     setSearchResults(updatedResults);
     setLatestResults(updatedResults);
     setValue(1);
-
     setActiveTab(1);
   };
 
