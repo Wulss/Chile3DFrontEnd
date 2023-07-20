@@ -17,6 +17,9 @@ const useStyles = {
     transform: "translate(-50%, -50%)",
     zIndex: 9999,
   },
+  itemLabelStyles: {
+    maxWidth: "35vw",
+  },
 };
 
 export default function ResultsTab({ results }) {
@@ -126,7 +129,7 @@ export default function ResultsTab({ results }) {
               />
             }
             label={
-              <div>
+              <div css={useStyles.itemLabelStyles}>
                 <Typography variant="subtitle2">
                   <strong>Nombre:</strong> {item.nombre}
                 </Typography>
@@ -148,7 +151,7 @@ export default function ResultsTab({ results }) {
           />
         ))}
       </Grid>
-      <Grid item xs={12}>
+      <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end"}}>
         <Button variant="contained" onClick={handleDownloadRoutes}>
           Descargar
         </Button>
